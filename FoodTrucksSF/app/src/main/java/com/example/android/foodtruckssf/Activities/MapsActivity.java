@@ -116,7 +116,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 // Ignore First Item
                 if(i == 0)
                     continue;
-                 JsonFoodTruck instance = foodTruckArrayList.get(i);
+                JsonFoodTruck instance = foodTruckArrayList.get(i);
                 double lat = Double.parseDouble(instance.getLatitude());
                 double lon = Double.parseDouble(instance.getLongitude());
                 LatLng Pos = new LatLng(lat, lon);
@@ -252,6 +252,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                         // Set Find Button Text To Clear
                         SearchButton.setText("Clear");
+
+                        // Set Cluster Data Set
+                        mClusterManager.cluster();
                         return;
                     }
                 }
@@ -296,17 +299,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public boolean OnJsonParseSuccess(ArrayList<JsonFoodTruck> foodTruckArrayList) {
         if(mMap != null){
             this.foodTruckArrayList = foodTruckArrayList;
-            addListOfMarkersToCluster();
             ApplicantNames = new ArrayList<>();
-            // Add To Json Food Truck
             for(JsonFoodTruck truck : foodTruckArrayList){
-                ApplicantNames.add(truck.getApplicant());
+
+                // Check If Name Already Exists In Database
+                boolean foundEntry = false;
+                for(String Names : ApplicantNames){
+                    if(Names.equals(truck.getApplicant())){
+                        foundEntry = true;
+                        break;
+                    }
+                }
+                if(!foundEntry)
+                    ApplicantNames.add(truck.getApplicant());
             }
-
-
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
+
+                    // Add Markers Tu Cluster
+                    addListOfMarkersToCluster();
                     ArrayAdapter<String> adapter = new ArrayAdapter<>(getApplicationContext(),android.R.layout.simple_dropdown_item_1line, ApplicantNames);
                     //Set the number of characters the user must type before the drop down list is shown
                     SearchEdit.setThreshold(1);
